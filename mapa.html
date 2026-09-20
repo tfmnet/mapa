@@ -65,6 +65,31 @@ border-radius: 8px;
 overflow: hidden;
 box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
+#country-info {
+display: none;
+max-width: 1000px;
+margin: 0 auto 12px;
+padding: 12px;
+background-color: #fff;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#country-info.visible {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 12px;
+}
+#country-info img {
+width: 80px;
+height: auto;
+border: 1px solid #ccc;
+}
+#country-name {
+font-size: 1.2rem;
+font-weight: bold;
+}
 .country {
 stroke: #ffffff;
 stroke-width: 0.5px;
@@ -92,6 +117,11 @@ stroke: #333;
 </div>
 
 <div id="country-count" aria-live="polite"></div>
+
+<div id="country-info" aria-live="polite">
+<img id="country-flag" alt="">
+<span id="country-name"></span>
+</div>
 
 <div id="map-container"></div>
 
@@ -327,6 +357,30 @@ countElement.textContent = `${matchingCountries} ${matchingCountries === 1 ? "pa
 }
 }
 
+function clearCountryInfo() {
+const infoElement = document.getElementById("country-info");
+infoElement.classList.remove("visible");
+document.getElementById("country-flag").removeAttribute("src");
+document.getElementById("country-name").textContent = "";
+}
+
+async function showCountryInfo(country) {
+const flagElement = document.getElementById("country-flag");
+const nameElement = document.getElementById("country-name");
+nameElement.textContent = country.properties.name;
+flagElement.alt = `Bandeira de ${country.properties.name}`;
+document.getElementById("country-info").classList.add("visible");
+
+try {
+const response = await fetch(`https://restcountries.com/v3.1/alpha/${country.id}?fields=flags`);
+const countryData = await response.json();
+flagElement.src = countryData[0].flags.png;
+} catch (error) {
+flagElement.removeAttribute("src");
+console.error("Erro ao carregar a bandeira do país:", error);
+}
+}
+
 // Atualizar as cores no mapa
 function updateMap() {
 updateCountryCount();
@@ -358,6 +412,9 @@ const svg = d3.select("#map-container")
 .attr("width", "100%")
 .attr("height", "auto");
 
+document.addEventListener("click", clearCountryInfo);
+svg.on("click", clearCountryInfo);
+
 // Projeção Mercator
 const projection = d3.geoMercator()
 .scale(130)
@@ -375,6 +432,10 @@ svg.append("g")
 .attr("class", "country")
 .attr("d", path)
 .attr("fill", "#cccccc")
+.on("click", function(event, country) {
+event.stopPropagation();
+showCountryInfo(country);
+})
 // Adicionar uma tooltip nativa no elemento para identificar os países
 .append("title")
 .text(d => d.properties.name);
