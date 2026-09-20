@@ -26,6 +26,10 @@ justify-content: center;
 gap: 10px;
 flex-wrap: wrap;
 }
+#country-count {
+margin: -10px 0 20px;
+font-weight: bold;
+}
 .color-btn {
 border: 2px solid transparent;
 border-radius: 5px;
@@ -87,11 +91,12 @@ stroke: #333;
 <button class="color-btn btn-orange" onclick="toggleColor('orange', this)">Laranja</button>
 </div>
 
+<div id="country-count" aria-live="polite"></div>
+
 <div id="map-container"></div>
 
 <script>
-// Mapeamento de demonstração com os códigos de país (ISO 3166-1 alpha-3) para as cores das suas bandeiras.
-// A lista não é exaustiva, mas cobre um subconjunto representativo. Pode adicionar mais países seguindo a mesma estrutura.
+// Códigos de país ISO 3166-1 alpha-3 e as cores presentes nas suas bandeiras.
 const flagData = {
 "PRT": ["red", "green", "yellow", "white", "blue"], // Portugal
 "ESP": ["red", "yellow"], // Espanha
@@ -131,7 +136,163 @@ const flagData = {
 "NGA": ["green", "white"], // Nigéria
 "TUR": ["red", "white"], // Turquia
 "SAU": ["green", "white"], // Arábia Saudita
-"IDN": ["red", "white"] // Indonésia
+"IDN": ["red", "white"], // Indonésia
+"AFG": ["black", "red", "green", "white"],
+"DZA": ["green", "white", "red"],
+"ALB": ["red", "black"],
+"AND": ["blue", "yellow", "red"],
+"AGO": ["red", "black", "yellow"],
+"ATG": ["red", "blue", "white", "black", "yellow"],
+"ARM": ["red", "blue", "yellow"],
+"AZE": ["blue", "red", "green", "white"],
+"BHS": ["blue", "yellow", "black"],
+"BHR": ["red", "white"],
+"BGD": ["green", "red"],
+"BRB": ["blue", "yellow", "black"],
+"BLR": ["red", "green", "white"],
+"BLZ": ["blue", "red", "white", "green", "yellow", "black"],
+"BEN": ["green", "yellow", "red"],
+"BTN": ["yellow", "orange", "white", "black"],
+"BOL": ["red", "yellow", "green"],
+"BIH": ["blue", "yellow", "white"],
+"BWA": ["blue", "black", "white"],
+"BRN": ["yellow", "white", "black", "red"],
+"BGR": ["white", "green", "red"],
+"BFA": ["red", "green", "yellow"],
+"BDI": ["red", "white", "green"],
+"CPV": ["blue", "white", "red", "yellow"],
+"KHM": ["blue", "red", "white"],
+"CMR": ["green", "red", "yellow"],
+"CAF": ["blue", "white", "green", "yellow", "red"],
+"TCD": ["blue", "yellow", "red"],
+"COM": ["yellow", "white", "red", "blue", "green"],
+"COG": ["green", "yellow", "red"],
+"COD": ["blue", "red", "yellow"],
+"CRI": ["blue", "white", "red"],
+"CIV": ["orange", "white", "green"],
+"HRV": ["red", "white", "blue"],
+"CUB": ["blue", "white", "red"],
+"CYP": ["white", "orange", "green"],
+"CZE": ["white", "red", "blue"],
+"DJI": ["blue", "green", "white", "red"],
+"DMA": ["green", "yellow", "black", "white", "red"],
+"DOM": ["blue", "red", "white"],
+"ECU": ["yellow", "blue", "red"],
+"SLV": ["blue", "white"],
+"GNQ": ["green", "white", "red", "blue"],
+"ERI": ["green", "red", "blue", "yellow"],
+"EST": ["blue", "black", "white"],
+"SWZ": ["blue", "red", "yellow", "black", "white"],
+"ETH": ["green", "yellow", "red", "blue"],
+"FJI": ["blue", "red", "white"],
+"GAB": ["green", "yellow", "blue"],
+"GMB": ["red", "blue", "green", "white"],
+"GEO": ["white", "red"],
+"GHA": ["red", "yellow", "green", "black"],
+"GRD": ["red", "yellow", "green", "blue"],
+"GTM": ["blue", "white"],
+"GIN": ["red", "yellow", "green"],
+"GNB": ["red", "yellow", "green", "black"],
+"GUY": ["green", "yellow", "red", "black", "white"],
+"HTI": ["blue", "red", "white"],
+"HND": ["blue", "white"],
+"HUN": ["red", "white", "green"],
+"ISL": ["blue", "white", "red"],
+"IRN": ["green", "white", "red"],
+"IRQ": ["red", "white", "black", "green"],
+"ISR": ["blue", "white"],
+"JAM": ["green", "yellow", "black"],
+"JOR": ["black", "white", "green", "red"],
+"KAZ": ["blue", "yellow"],
+"KEN": ["black", "red", "green", "white"],
+"KIR": ["red", "blue", "white", "yellow"],
+"PRK": ["red", "blue", "white"],
+"KWT": ["green", "white", "red", "black"],
+"KGZ": ["red", "yellow"],
+"LAO": ["red", "blue", "white"],
+"LVA": ["red", "white"],
+"LBN": ["red", "white", "green"],
+"LSO": ["blue", "white", "green", "black"],
+"LBR": ["red", "white", "blue"],
+"LBY": ["red", "black", "green", "white"],
+"LIE": ["blue", "red", "yellow"],
+"LTU": ["yellow", "green", "red"],
+"LUX": ["red", "white", "blue"],
+"MDG": ["white", "red", "green"],
+"MWI": ["black", "red", "green"],
+"MYS": ["red", "white", "blue", "yellow"],
+"MDV": ["red", "green", "white"],
+"MLI": ["green", "yellow", "red"],
+"MLT": ["white", "red"],
+"MHL": ["blue", "white", "orange"],
+"MRT": ["green", "yellow", "red"],
+"MUS": ["red", "blue", "yellow", "green"],
+"FSM": ["blue", "white"],
+"MDA": ["blue", "yellow", "red"],
+"MCO": ["red", "white"],
+"MNG": ["red", "blue", "yellow"],
+"MNE": ["red", "yellow", "blue", "white"],
+"MAR": ["red", "green"],
+"MOZ": ["green", "black", "yellow", "white", "red"],
+"MMR": ["yellow", "green", "red", "white"],
+"NAM": ["blue", "red", "green", "white", "yellow"],
+"NRU": ["blue", "yellow", "white"],
+"NPL": ["red", "blue", "white"],
+"NIC": ["blue", "white"],
+"NER": ["orange", "white", "green"],
+"MKD": ["red", "yellow"],
+"OMN": ["white", "red", "green"],
+"PAK": ["green", "white"],
+"PLW": ["blue", "yellow"],
+"PAN": ["white", "red", "blue"],
+"PNG": ["red", "black", "yellow", "white"],
+"PRY": ["red", "white", "blue"],
+"PHL": ["blue", "red", "white", "yellow"],
+"QAT": ["red", "white"],
+"ROU": ["blue", "yellow", "red"],
+"RWA": ["blue", "yellow", "green"],
+"KNA": ["green", "red", "black", "yellow", "white"],
+"LCA": ["blue", "black", "white", "yellow"],
+"VCT": ["blue", "yellow", "green"],
+"WSM": ["red", "blue", "white"],
+"SMR": ["white", "blue", "yellow"],
+"STP": ["green", "yellow", "red", "black"],
+"SEN": ["green", "yellow", "red"],
+"SRB": ["red", "blue", "white"],
+"SYC": ["blue", "yellow", "red", "white", "green"],
+"SLE": ["green", "white", "blue"],
+"SVK": ["white", "blue", "red"],
+"SVN": ["white", "blue", "red"],
+"SLB": ["blue", "green", "yellow", "white"],
+"SOM": ["blue", "white"],
+"SGP": ["red", "white"],
+"SSD": ["black", "red", "green", "white", "blue", "yellow"],
+"LKA": ["yellow", "red", "orange", "green"],
+"SDN": ["red", "white", "black", "green"],
+"SUR": ["green", "white", "red", "yellow"],
+"SYR": ["red", "white", "black", "green"],
+"TJK": ["red", "white", "green", "yellow"],
+"TZA": ["green", "blue", "black", "yellow"],
+"THA": ["red", "white", "blue"],
+"TLS": ["red", "yellow", "black", "white"],
+"TGO": ["green", "yellow", "red", "white"],
+"TON": ["red", "white"],
+"TTO": ["red", "black", "white"],
+"TKM": ["green", "red", "white", "yellow"],
+"TUV": ["blue", "white", "yellow"],
+"TUN": ["red", "white"],
+"UGA": ["black", "yellow", "red", "white"],
+"ARE": ["red", "green", "white", "black"],
+"URY": ["white", "blue", "yellow"],
+"UZB": ["blue", "white", "green", "red"],
+"VUT": ["red", "green", "black", "yellow", "white"],
+"VAT": ["yellow", "white"],
+"VEN": ["yellow", "blue", "red"],
+"PSE": ["black", "white", "green", "red"],
+"VNM": ["red", "yellow"],
+"YEM": ["red", "white", "black"],
+"ZMB": ["green", "red", "black", "orange"],
+"ZWE": ["green", "yellow", "red", "black", "white"]
 };
 
 const selectedColors = new Set();
@@ -148,8 +309,27 @@ buttonElement.classList.add('active');
 updateMap();
 }
 
+function countryMatchesSelection(countryColors) {
+return [...selectedColors].every(color => countryColors.includes(color));
+}
+
+function updateCountryCount() {
+const totalCountries = Object.keys(flagData).length;
+const matchingCountries = Object.values(flagData).filter(countryMatchesSelection).length;
+const countElement = document.getElementById("country-count");
+
+if (selectedColors.size === 0) {
+countElement.textContent = `${totalCountries} países considerados no total, segundo a lista internacional ISO 3166-1 alpha-3.`;
+} else if (matchingCountries === 0) {
+countElement.textContent = "Noooooope!.... nobody is that tacky!!...";
+} else {
+countElement.textContent = `${matchingCountries} ${matchingCountries === 1 ? "país selecionado" : "países selecionados"}.`;
+}
+}
+
 // Atualizar as cores no mapa
 function updateMap() {
+updateCountryCount();
 d3.selectAll(".country")
 .attr("fill", function(d) {
 if (selectedColors.size === 0) return "#cccccc"; // Cinzento padrão se nenhuma cor selecionada
@@ -159,17 +339,14 @@ const countryColors = flagData[d.id] || [];
 if (countryColors.length === 0) return "#e0e0e0"; // Sem dados para o país
 
 // Condição: O país tem de incluir todas as cores selecionadas no filtro.
-let hasAllColors = true;
-selectedColors.forEach(color => {
-if (!countryColors.includes(color)) {
-hasAllColors = false;
-}
-});
+const hasAllColors = countryMatchesSelection(countryColors);
 
 // Realça o país a verde escuro se cumprir a condição
 return hasAllColors ? "#2c3e50" : "#cccccc";
 });
 }
+
+updateCountryCount();
 
 // Inicialização do Mapa D3.js
 const width = 1000;
