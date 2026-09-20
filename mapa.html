@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Filtro de Cores de Bandeiras</title>
+<!-- Carregamento da biblioteca D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body {
+font-family: Arial, sans-serif;
+background-color: #f9f9f9;
+margin: 0;
+padding: 20px;
+text-align: center;
+color: #333;
+}
+h1 {
+font-size: 1.5rem;
+margin-bottom: 20px;
+}
+#filters {
+margin-bottom: 20px;
+display: flex;
+justify-content: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+.color-btn {
+border: 2px solid transparent;
+border-radius: 5px;
+padding: 10px 20px;
+cursor: pointer;
+font-weight: bold;
+font-size: 1rem;
+text-transform: uppercase;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+transition: transform 0.2s, border 0.2s;
+}
+.color-btn.active {
+border: 2px solid #000;
+transform: scale(1.1);
+box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Definição de estilos para os botões de cor */
+.btn-red { background-color: #ff4d4d; color: white; }
+.btn-blue { background-color: #4da6ff; color: white; }
+.btn-green { background-color: #4dff4d; color: black; }
+.btn-yellow { background-color: #ffff4d; color: black; }
+.btn-black { background-color: #333; color: white; }
+.btn-white { background-color: #fff; color: black; border: 1px solid #ccc; }
+.btn-orange { background-color: #ffa64d; color: black; }
+
+#map-container {
+max-width: 1000px;
+margin: 0 auto;
+background-color: #e0f7fa; /* Cor para os oceanos */
+border: 1px solid #ccc;
+border-radius: 8px;
+overflow: hidden;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.country {
+stroke: #ffffff;
+stroke-width: 0.5px;
+transition: fill 0.3s ease;
+}
+.country:hover {
+opacity: 0.8;
+stroke-width: 1px;
+stroke: #333;
+}
+</style>
+</head>
+<body>
+
+<h1>Filtrar Países pelas Cores da Bandeira</h1>
+
+<div id="filters">
+<button class="color-btn btn-red" onclick="toggleColor('red', this)">Vermelho</button>
+<button class="color-btn btn-blue" onclick="toggleColor('blue', this)">Azul</button>
+<button class="color-btn btn-green" onclick="toggleColor('green', this)">Verde</button>
+<button class="color-btn btn-yellow" onclick="toggleColor('yellow', this)">Amarelo</button>
+<button class="color-btn btn-black" onclick="toggleColor('black', this)">Preto</button>
+<button class="color-btn btn-white" onclick="toggleColor('white', this)">Branco</button>
+<button class="color-btn btn-orange" onclick="toggleColor('orange', this)">Laranja</button>
+</div>
+
+<div id="map-container"></div>
+
+<script>
+// Mapeamento de demonstração com os códigos de país (ISO 3166-1 alpha-3) para as cores das suas bandeiras.
+// A lista não é exaustiva, mas cobre um subconjunto representativo. Pode adicionar mais países seguindo a mesma estrutura.
+const flagData = {
+"PRT": ["red", "green", "yellow", "white", "blue"], // Portugal
+"ESP": ["red", "yellow"], // Espanha
+"FRA": ["blue", "white", "red"], // França
+"GBR": ["red", "white", "blue"], // Reino Unido
+"DEU": ["black", "red", "yellow"], // Alemanha
+"ITA": ["green", "white", "red"], // Itália
+"NLD": ["red", "white", "blue"], // Países Baixos
+"BEL": ["black", "yellow", "red"], // Bélgica
+"CHE": ["red", "white"], // Suíça
+"AUT": ["red", "white"], // Áustria
+"GRC": ["blue", "white"], // Grécia
+"SWE": ["blue", "yellow"], // Suécia
+"NOR": ["red", "white", "blue"], // Noruega
+"DNK": ["red", "white"], // Dinamarca
+"FIN": ["white", "blue"], // Finlândia
+"POL": ["white", "red"], // Polónia
+"IRL": ["green", "white", "orange"], // Irlanda
+"UKR": ["blue", "yellow"], // Ucrânia
+"RUS": ["white", "blue", "red"], // Rússia
+"USA": ["red", "white", "blue"], // EUA
+"CAN": ["red", "white"], // Canadá
+"MEX": ["green", "white", "red"], // México
+"BRA": ["green", "yellow", "blue", "white"], // Brasil
+"ARG": ["blue", "white", "yellow"], // Argentina
+"CHL": ["red", "white", "blue"], // Chile
+"COL": ["yellow", "blue", "red"], // Colômbia
+"PER": ["red", "white"], // Peru
+"CHN": ["red", "yellow"], // China
+"JPN": ["red", "white"], // Japão
+"KOR": ["white", "black", "red", "blue"], // Coreia do Sul
+"IND": ["orange", "white", "green", "blue"], // Índia
+"AUS": ["red", "white", "blue"], // Austrália
+"NZL": ["red", "white", "blue"], // Nova Zelândia
+"ZAF": ["red", "green", "blue", "yellow", "black", "white"], // África do Sul
+"EGY": ["red", "white", "black", "yellow"], // Egito
+"NGA": ["green", "white"], // Nigéria
+"TUR": ["red", "white"], // Turquia
+"SAU": ["green", "white"], // Arábia Saudita
+"IDN": ["red", "white"] // Indonésia
+};
+
+const selectedColors = new Set();
+
+// Alternar a seleção de cores
+function toggleColor(color, buttonElement) {
+if (selectedColors.has(color)) {
+selectedColors.delete(color);
+buttonElement.classList.remove('active');
+} else {
+selectedColors.add(color);
+buttonElement.classList.add('active');
+}
+updateMap();
+}
+
+// Atualizar as cores no mapa
+function updateMap() {
+d3.selectAll(".country")
+.attr("fill", function(d) {
+if (selectedColors.size === 0) return "#cccccc"; // Cinzento padrão se nenhuma cor selecionada
+
+const countryColors = flagData[d.id] || [];
+
+if (countryColors.length === 0) return "#e0e0e0"; // Sem dados para o país
+
+// Condição: O país tem de incluir todas as cores selecionadas no filtro.
+let hasAllColors = true;
+selectedColors.forEach(color => {
+if (!countryColors.includes(color)) {
+hasAllColors = false;
+}
+});
+
+// Realça o país a verde escuro se cumprir a condição
+return hasAllColors ? "#2c3e50" : "#cccccc";
+});
+}
+
+// Inicialização do Mapa D3.js
+const width = 1000;
+const height = 500;
+
+const svg = d3.select("#map-container")
+.append("svg")
+.attr("viewBox", 0 0 ${width} ${height})
+.attr("width", "100%")
+.attr("height", "auto");
+
+// Projeção Mercator
+const projection = d3.geoMercator()
+.scale(130)
+.translate([width / 2, height / 1.5]);
+
+const path = d3.geoPath().projection(projection);
+
+// Carregar a topologia GeoJSON a partir do GitHub de d3-graph-gallery
+d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(function(data) {
+svg.append("g")
+.selectAll("path")
+.data(data.features)
+.enter()
+.append("path")
+.attr("class", "country")
+.attr("d", path)
+.attr("fill", "#cccccc")
+// Adicionar uma tooltip nativa no elemento para identificar os países
+.append("title")
+.text(d => d.properties.name);
+}).catch(function(error) {
+console.error("Erro ao carregar os dados geográficos:", error);
+});
+</script>
+</body>
+</html>
