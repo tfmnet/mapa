@@ -364,21 +364,15 @@ document.getElementById("country-flag").removeAttribute("src");
 document.getElementById("country-name").textContent = "";
 }
 
-async function showCountryInfo(country) {
+const alpha2ByAlpha3 = Object.fromEntries("AFG:af,AGO:ao,ALB:al,AND:ad,ARE:ae,ARG:ar,ARM:am,ATG:ag,AUS:au,AUT:at,AZE:az,BDI:bi,BEL:be,BEN:bj,BFA:bf,BGD:bd,BGR:bg,BHR:bh,BHS:bs,BIH:ba,BLR:by,BLZ:bz,BOL:bo,BRA:br,BRB:bb,BRN:bn,BTN:bt,BWA:bw,CAF:cf,CAN:ca,CHE:ch,CHL:cl,CHN:cn,CIV:ci,CMR:cm,COD:cd,COG:cg,COL:co,COM:km,CPV:cv,CRI:cr,CUB:cu,CYP:cy,CZE:cz,DEU:de,DJI:dj,DMA:dm,DNK:dk,DOM:do,DZA:dz,ECU:ec,EGY:eg,ERI:er,ESP:es,EST:ee,ETH:et,FIN:fi,FJI:fj,FRA:fr,FSM:fm,GAB:ga,GBR:gb,GEO:ge,GHA:gh,GIN:gn,GMB:gm,GNB:gw,GNQ:gq,GRC:gr,GRD:gd,GTM:gt,GUY:gy,HND:hn,HRV:hr,HTI:ht,HUN:hu,IDN:id,IND:in,IRL:ie,IRN:ir,IRQ:iq,ISL:is,ISR:il,ITA:it,JAM:jm,JOR:jo,JPN:jp,KAZ:kz,KEN:ke,KGZ:kg,KHM:kh,KIR:ki,KNA:kn,KOR:kr,KWT:kw,LAO:la,LBN:lb,LBR:lr,LBY:ly,LCA:lc,LIE:li,LKA:lk,LSO:ls,LTU:lt,LUX:lu,LVA:lv,MAR:ma,MCO:mc,MDA:md,MDG:mg,MDV:mv,MEX:mx,MHL:mh,MKD:mk,MLI:ml,MLT:mt,MMR:mm,MNE:me,MNG:mn,MOZ:mz,MRT:mr,MUS:mu,MWI:mw,MYS:my,NAM:na,NER:ne,NGA:ng,NIC:ni,NLD:nl,NOR:no,NPL:np,NRU:nr,NZL:nz,OMN:om,PAK:pk,PAN:pa,PER:pe,PHL:ph,PLW:pw,PNG:pg,POL:pl,PRK:kp,PRT:pt,PRY:py,PSE:ps,QAT:qa,ROU:ro,RUS:ru,RWA:rw,SAU:sa,SDN:sd,SEN:sn,SGP:sg,SLB:sb,SLE:sl,SLV:sv,SMR:sm,SOM:so,SRB:rs,SSD:ss,STP:st,SUR:sr,SVK:sk,SVN:si,SWE:se,SWZ:sz,SYC:sc,SYR:sy,TCD:td,TGO:tg,THA:th,TJK:tj,TKM:tm,TLS:tl,TON:to,TTO:tt,TUN:tn,TUR:tr,TUV:tv,TZA:tz,UGA:ug,UKR:ua,URY:uy,USA:us,UZB:uz,VAT:va,VCT:vc,VEN:ve,VNM:vn,VUT:vu,WSM:ws,YEM:ye,ZAF:za,ZMB:zm,ZWE:zw".split(",").map(entry => entry.split(":")));
+
+function showCountryInfo(country) {
 const flagElement = document.getElementById("country-flag");
 const nameElement = document.getElementById("country-name");
 nameElement.textContent = country.properties.name;
 flagElement.alt = `Bandeira de ${country.properties.name}`;
+flagElement.src = `https://flagcdn.com/w160/${alpha2ByAlpha3[country.id]}.png`;
 document.getElementById("country-info").classList.add("visible");
-
-try {
-const response = await fetch(`https://restcountries.com/v3.1/alpha/${country.id}?fields=flags`);
-const countryData = await response.json();
-flagElement.src = countryData[0].flags.png;
-} catch (error) {
-flagElement.removeAttribute("src");
-console.error("Erro ao carregar a bandeira do país:", error);
-}
 }
 
 // Atualizar as cores no mapa
