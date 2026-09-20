@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa | Variante 3</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root { --ocean: #d8edf0; --country-default: #f8f4eb; --country-muted: #bfd1d0; --country-match: #265b5c; --ink: #193b3d; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--ocean); color: var(--ink); font-family: "Trebuchet MS", sans-serif; }
+#map { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; }
+.country { stroke: #d8edf0; stroke-width: .8px; vector-effect: non-scaling-stroke; transition: fill .25s ease, opacity .25s ease; cursor: pointer; }
+.country:hover { opacity: .72; }
+#legend { position: fixed; left: 14px; bottom: 14px; width: min(245px, 43vw); padding: 11px 12px; background: rgba(255,255,255,.9); border: 1px solid rgba(25,59,61,.2); border-radius: 12px; box-shadow: 0 10px 28px rgba(25,59,61,.14); }
+#legend h1 { margin: 0 0 8px; color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: .02em; }
+#colors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.color-btn { padding: 5px 2px; border: 1px solid rgba(25,59,61,.2); border-radius: 5px; color: #fff; font: 10px "Trebuchet MS", sans-serif; cursor: pointer; filter: saturate(.9); }
+.color-btn.active { outline: 2px solid var(--country-match); outline-offset: 1px; filter: saturate(1.35); }
+.btn-red { background:#c4574f; } .btn-blue { background:#4b8295; } .btn-green { background:#5c966d; } .btn-yellow { background:#d4ad42; color:#193b3d; } .btn-black { background:#243b3c; } .btn-white { background:#fff; color:#193b3d; } .btn-orange { background:#d58243; }
+#country-count { margin: 8px 0 0; color: #426466; font-size: 11px; }
+#country-info { position: fixed; z-index: 2; display: none; align-items: center; gap: 9px; width: 190px; padding: 9px; background: rgba(255,255,255,.96); border: 1px solid rgba(25,59,61,.22); border-radius: 9px; box-shadow: 0 10px 24px rgba(25,59,61,.18); pointer-events: none; }
+#country-info.visible { display: flex; }
+#country-flag { width: 62px; height: auto; border-radius: 2px; border: 1px solid rgba(25,59,61,.2); }
+#country-name { color: var(--ink); font-size: 14px; font-weight: 800; }
+</style>
+</head>
+<body>
+<svg id="map" aria-label="Mapa-mundo interativo"></svg>
+<section id="legend"><h1>Cores nas bandeiras</h1><div id="colors">
+<button class="color-btn btn-red" data-color="red">Vermelho</button><button class="color-btn btn-blue" data-color="blue">Azul</button><button class="color-btn btn-green" data-color="green">Verde</button><button class="color-btn btn-yellow" data-color="yellow">Amarelo</button><button class="color-btn btn-black" data-color="black">Preto</button><button class="color-btn btn-white" data-color="white">Branco</button><button class="color-btn btn-orange" data-color="orange">Laranja</button>
+</div><div id="country-count" aria-live="polite"></div></section>
+<section id="country-info" aria-live="polite"><img id="country-flag" alt=""><span id="country-name"></span></section>
+<script src="mapa_variantes.js"></script>
+</body>
+</html>

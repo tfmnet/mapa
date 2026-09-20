@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa | Variante 1</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root { --ocean: #b9dce2; --country-default: #e8dfc9; --country-muted: #c4c0b5; --country-match: #b74b3c; --ink: #24343a; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--ocean); color: var(--ink); font-family: Georgia, serif; }
+#map { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; }
+.country { stroke: rgba(255,255,255,.8); stroke-width: .7px; vector-effect: non-scaling-stroke; transition: fill .2s ease, opacity .2s ease; cursor: pointer; }
+.country:hover { opacity: .78; }
+#legend { position: fixed; left: 18px; bottom: 18px; width: min(250px, 42vw); padding: 12px; background: rgba(246,241,228,.92); border: 1px solid rgba(36,52,58,.28); box-shadow: 0 8px 24px rgba(36,52,58,.18); }
+#legend h1 { margin: 0 0 8px; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+#colors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.color-btn { min-width: 0; padding: 5px 3px; border: 1px solid rgba(36,52,58,.2); border-radius: 2px; color: #fff; font: 10px Georgia, serif; cursor: pointer; opacity: .74; }
+.color-btn.active { outline: 2px solid var(--ink); opacity: 1; transform: translateY(-1px); }
+.btn-red { background:#b74b3c; } .btn-blue { background:#427da0; } .btn-green { background:#628b62; } .btn-yellow { background:#c8a843; color:#24343a; } .btn-black { background:#273238; } .btn-white { background:#fff; color:#24343a; } .btn-orange { background:#c47b3d; }
+#country-count { margin: 9px 0 0; font-size: 11px; line-height: 1.2; }
+#country-info { position: fixed; z-index: 2; display: none; align-items: center; gap: 9px; width: 190px; padding: 9px; background: rgba(246,241,228,.96); border-left: 4px solid var(--country-match); box-shadow: 0 8px 22px rgba(36,52,58,.22); pointer-events: none; }
+#country-info.visible { display: flex; }
+#country-flag { width: 62px; height: auto; border: 1px solid rgba(36,52,58,.25); }
+#country-name { font-size: 14px; font-weight: bold; }
+</style>
+</head>
+<body>
+<svg id="map" aria-label="Mapa-mundo interativo"></svg>
+<section id="legend"><h1>Filtrar bandeiras</h1><div id="colors">
+<button class="color-btn btn-red" data-color="red">Vermelho</button><button class="color-btn btn-blue" data-color="blue">Azul</button><button class="color-btn btn-green" data-color="green">Verde</button><button class="color-btn btn-yellow" data-color="yellow">Amarelo</button><button class="color-btn btn-black" data-color="black">Preto</button><button class="color-btn btn-white" data-color="white">Branco</button><button class="color-btn btn-orange" data-color="orange">Laranja</button>
+</div><div id="country-count" aria-live="polite"></div></section>
+<section id="country-info" aria-live="polite"><img id="country-flag" alt=""><span id="country-name"></span></section>
+<script src="mapa_variantes.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa | Variante 2</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root { --ocean: #132b3a; --country-default: #315d6b; --country-muted: #244753; --country-match: #f4a261; --ink: #f4efe6; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--ocean); color: var(--ink); font-family: Arial, sans-serif; }
+#map { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; }
+.country { stroke: rgba(221,242,241,.3); stroke-width: .55px; vector-effect: non-scaling-stroke; transition: fill .18s ease, opacity .18s ease; cursor: pointer; }
+.country:hover { opacity: .72; }
+#legend { position: fixed; left: 16px; bottom: 16px; width: min(235px, 40vw); padding: 12px; background: rgba(9,22,31,.88); border: 1px solid rgba(244,162,97,.55); box-shadow: 0 0 28px rgba(0,0,0,.3); }
+#legend h1 { margin: 0 0 8px; color: #f4a261; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+#colors { display: flex; flex-wrap: wrap; gap: 5px; }
+.color-btn { padding: 5px 7px; border: 1px solid rgba(244,239,230,.3); border-radius: 10px; color: #fff; font: 10px Arial, sans-serif; cursor: pointer; opacity: .75; }
+.color-btn.active { border-color: #f4a261; box-shadow: 0 0 0 2px rgba(244,162,97,.25); opacity: 1; }
+.btn-red { background:#ad3f4d; } .btn-blue { background:#367c9a; } .btn-green { background:#3e8865; } .btn-yellow { background:#c49a35; color:#132b3a; } .btn-black { background:#101b24; } .btn-white { background:#eef5f2; color:#132b3a; } .btn-orange { background:#d96f32; }
+#country-count { margin: 9px 0 0; color: #d4e1df; font-size: 11px; }
+#country-info { position: fixed; z-index: 2; display: none; align-items: center; gap: 10px; width: 190px; padding: 10px; background: rgba(9,22,31,.94); border: 1px solid #f4a261; box-shadow: 0 0 22px rgba(0,0,0,.35); pointer-events: none; }
+#country-info.visible { display: flex; }
+#country-flag { width: 64px; height: auto; border: 1px solid rgba(244,239,230,.35); }
+#country-name { color: #f4efe6; font-size: 14px; font-weight: 700; }
+</style>
+</head>
+<body>
+<svg id="map" aria-label="Mapa-mundo interativo"></svg>
+<section id="legend"><h1>Map filter</h1><div id="colors">
+<button class="color-btn btn-red" data-color="red">Vermelho</button><button class="color-btn btn-blue" data-color="blue">Azul</button><button class="color-btn btn-green" data-color="green">Verde</button><button class="color-btn btn-yellow" data-color="yellow">Amarelo</button><button class="color-btn btn-black" data-color="black">Preto</button><button class="color-btn btn-white" data-color="white">Branco</button><button class="color-btn btn-orange" data-color="orange">Laranja</button>
+</div><div id="country-count" aria-live="polite"></div></section>
+<section id="country-info" aria-live="polite"><img id="country-flag" alt=""><span id="country-name"></span></section>
+<script src="mapa_variantes.js"></script>
+</body>
+</html>
