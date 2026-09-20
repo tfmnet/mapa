@@ -1,25 +1,171 @@
-const svg = d3.select("#map-container")
-.append("svg")
-.attr("viewBox", 0 0 ${width} ${height})
-.attr("width", "100%")
-.attr("height", "auto");
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Filtro de Cores de Bandeiras</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        #filters {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .color-btn {
+            border: 2px solid transparent;
+            border-radius: 5px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, border 0.2s;
+        }
+        .color-btn.active {
+            border: 2px solid #000;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-red { background-color: #ff4d4d; color: white; }
+        .btn-blue { background-color: #4da6ff; color: white; }
+        .btn-green { background-color: #4dff4d; color: black; }
+        .btn-yellow { background-color: #ffff4d; color: black; }
+        .btn-black { background-color: #333; color: white; }
+        .btn-white { background-color: #fff; color: black; border: 1px solid #ccc; }
+        .btn-orange { background-color: #ffa64d; color: black; }
 
-const projection = d3.geoMercator()
-.scale(100)
-.translate([width / 2, height / 1.5]);
+        #map-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #e0f7fa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .country {
+            stroke: #ffffff;
+            stroke-width: 0.5px;
+            transition: fill 0.3s ease;
+        }
+    </style>
+</head>
+<body>
 
-const path = d3.geoPath().projection(projection);
+    <h1>Filtrar Países pelas Cores da Bandeira</h1>
+    
+    <div id="filters">
+        <button class="color-btn btn-red" onclick="toggleColor('red', this)">Vermelho</button>
+        <button class="color-btn btn-blue" onclick="toggleColor('blue', this)">Azul</button>
+        <button class="color-btn btn-green" onclick="toggleColor('green', this)">Verde</button>
+        <button class="color-btn btn-yellow" onclick="toggleColor('yellow', this)">Amarelo</button>
+        <button class="color-btn btn-black" onclick="toggleColor('black', this)">Preto</button>
+        <button class="color-btn btn-white" onclick="toggleColor('white', this)">Branco</button>
+        <button class="color-btn btn-orange" onclick="toggleColor('orange', this)">Laranja</button>
+    </div>
 
-svg.append("g")
-.selectAll("path")
-.data(worldGeoJSON.features)
-.enter()
-.append("path")
-.attr("class", "country")
-.attr("d", path)
-.attr("fill", "#cccccc")
-.append("title")
-.text(d => d.properties.name);
-</script>
+    <div id="map-container"></div>
+
+    <script>
+        const flagData = {
+            "PRT": ["red", "green", "yellow", "white", "blue"],
+            "ESP": ["red", "yellow"],
+            "FRA": ["blue", "white", "red"],
+            "DEU": ["black", "red", "yellow"],
+            "ITA": ["green", "white", "red"],
+            "GBR": ["red", "white", "blue"],
+            "USA": ["red", "white", "blue"],
+            "BRA": ["green", "yellow", "blue", "white"]
+        };
+
+        // GeoJSON embutido diretamente para contornar o bloqueio CORS do browser no ficheiro local
+        const worldGeoJSON = {
+            "type": "FeatureCollection",
+            "features": [
+                { "type": "Feature", "id": "PRT", "properties": { "name": "Portugal" }, "geometry": { "type": "Polygon", "coordinates": [[[-9.5, 37.0], [-9.5, 42.1], [-6.2, 42.1], [-6.2, 37.0], [-9.5, 37.0]]] } },
+                { "type": "Feature", "id": "ESP", "properties": { "name": "Espanha" }, "geometry": { "type": "Polygon", "coordinates": [[[-9.3, 36.0], [-9.3, 43.8], [3.3, 43.8], [3.3, 36.0], [-9.3, 36.0]]] } },
+                { "type": "Feature", "id": "FRA", "properties": { "name": "França" }, "geometry": { "type": "Polygon", "coordinates": [[[-4.8, 42.3], [-4.8, 51.1], [8.2, 51.1], [8.2, 42.3], [-4.8, 42.3]]] } },
+                { "type": "Feature", "id": "DEU", "properties": { "name": "Alemanha" }, "geometry": { "type": "Polygon", "coordinates": [[[5.9, 47.3], [5.9, 55.1], [15.0, 55.1], [15.0, 47.3], [5.9, 47.3]]] } },
+                { "type": "Feature", "id": "ITA", "properties": { "name": "Itália" }, "geometry": { "type": "Polygon", "coordinates": [[[6.6, 36.6], [6.6, 47.1], [18.5, 47.1], [18.5, 36.6], [6.6, 36.6]]] } },
+                { "type": "Feature", "id": "GBR", "properties": { "name": "Reino Unido" }, "geometry": { "type": "Polygon", "coordinates": [[[-8.1, 50.0], [-8.1, 58.7], [1.8, 58.7], [1.8, 50.0], [-8.1, 50.0]]] } },
+                { "type": "Feature", "id": "USA", "properties": { "name": "EUA" }, "geometry": { "type": "Polygon", "coordinates": [[[-125.0, 25.0], [-125.0, 49.0], [-66.9, 49.0], [-66.9, 25.0], [-125.0, 25.0]]] } },
+                { "type": "Feature", "id": "BRA", "properties": { "name": "Brasil" }, "geometry": { "type": "Polygon", "coordinates": [[[-73.9, -33.7], [-73.9, 5.2], [-34.7, 5.2], [-34.7, -33.7], [-73.9, -33.7]]] } }
+            ]
+        };
+
+        const selectedColors = new Set();
+
+        function toggleColor(color, buttonElement) {
+            if (selectedColors.has(color)) {
+                selectedColors.delete(color);
+                buttonElement.classList.remove('active');
+            } else {
+                selectedColors.add(color);
+                buttonElement.classList.add('active');
+            }
+            updateMap();
+        }
+
+        function updateMap() {
+            d3.selectAll(".country")
+                .attr("fill", function(d) {
+                    if (selectedColors.size === 0) return "#cccccc";
+                    const countryColors = flagData[d.id] || [];
+                    if (countryColors.length === 0) return "#e0e0e0";
+                    
+                    let hasAllColors = true;
+                    selectedColors.forEach(color => {
+                        if (!countryColors.includes(color)) {
+                            hasAllColors = false;
+                        }
+                    });
+
+                    return hasAllColors ? "#2c3e50" : "#cccccc";
+                });
+        }
+
+        const width = 800;
+        const height = 450;
+
+        const svg = d3.select("#map-container")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width} ${height}`)
+            .attr("width", "100%")
+            .attr("height", "auto");
+
+        const projection = d3.geoMercator()
+            .scale(100)
+            .translate([width / 2, height / 1.5]);
+
+        const path = d3.geoPath().projection(projection);
+
+        svg.append("g")
+            .selectAll("path")
+            .data(worldGeoJSON.features)
+            .enter()
+            .append("path")
+            .attr("class", "country")
+            .attr("d", path)
+            .attr("fill", "#cccccc")
+            .append("title")
+            .text(d => d.properties.name);
+    </script>
 </body>
 </html>
